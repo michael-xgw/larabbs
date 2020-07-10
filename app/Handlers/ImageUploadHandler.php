@@ -1,10 +1,10 @@
 <?php
 namespace App\Handlers;
-
+use Image;
 class ImageUploadHandler{
     protected $allowed_ext = ['png','jpg','jpeg','gif'];
 
-    public function save($file, $folder,$file_prefix){
+    public function save($file, $folder,$file_prefix,$max_width=false){
         $folder_name = "uploads/images/$folder".date('Ym/d',time());
         $upload_path = public_path().'/'.$folder_name;
         $extension = strtolower($file->getClientOriginalExtension())?:'png';
@@ -18,5 +18,16 @@ class ImageUploadHandler{
                 'path' =>config('app.url')."/$folder_name/$filename"
         ];
 
+    }
+
+    public function reduceSize($file_path, $max_width){
+        $image = Image::make($file_path);
+
+        $image->resize($max_width,null,function($constraint){
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+
+        $image ->save();
     }
 }
